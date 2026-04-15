@@ -1,0 +1,30 @@
+services:
+  jupyter:
+    build: .
+    container_name: jupyter_server
+    volumes:
+      - ./work:/home/jovyan/work
+    environment:
+      # Disable tokens to force password use
+      - JUPYTER_TOKEN=""
+      # Paste your generated hash here
+      - JUPYTER_PASSWORD_HASH="argon2:$argon2id$v=19$m=10240,t=10,p=8$u7zEeKQEnHgX9dck1c7LpQ$57Afy9+Vw0WFaUnfYHnYlAAeVKj06BA/9Ga/9G2PoHA"
+    restart: always
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - jupyter
+    restart: always
+
+volumes:
+  caddy_data:
+  caddy_config:
