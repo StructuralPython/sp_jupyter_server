@@ -1,0 +1,6 @@
+:80 {
+    reverse_proxy jupyter:8888 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+}

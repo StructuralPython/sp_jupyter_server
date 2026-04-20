@@ -1,0 +1,26 @@
+{
+    email {$AUTHELIA_EMAIL}
+}
+
+{$DOMAIN_NAME} {
+    # Authelia Portal
+    route /authelia* {
+        reverse_proxy localhost:9091
+    }
+
+    # Protect all other endpoints
+    forward_auth localhost:9091 {
+        uri /api/verify?rd=https://{$DOMAIN_NAME}/authelia/
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+
+    # Jupyter Lab endpoint
+    handle_path /jupyter* {
+        reverse_proxy localhost:8888
+    }
+
+    # VS Code endpoint
+    handle_path /code* {
+        reverse_proxy localhost:8080
+    }
+}

@@ -1,0 +1,40 @@
+services:
+  # The Brains: Jupyter, VS Code, and uv
+  app:
+    build: .
+    volumes:
+      - user-data:/home/engineering
+      - app-config:/config
+    environment:
+      - INITIAL_PYTHON_PACKAGES=${INITIAL_PYTHON_PACKAGES}
+    restart: always
+
+  # The Identity Provider: Official Authelia
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    volumes:
+      - app-config:/config
+    environment:
+      - AUTHELIA_PASSWORD_RESET_DISABLE=true
+    restart: always
+
+  # The Proxy: Official Caddy
+caddy:
+    image: caddy:latest
+    ports:
+      - "80:80" # Bunny.net maps its public 443 to this internal 80
+    volumes:
+      - app-config:/etc/caddy
+      - app-config:/config/caddy_data
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - AUTHELIA_EMAIL=${AUTHELIA_EMAIL}
+    depends_on:
+      - authelia
+      - app
+    restart: always
+
+volumes:
+  user-data:   # Persistent Home Directory
+  app-config:  # Persistent Config for Authelia & Caddy
