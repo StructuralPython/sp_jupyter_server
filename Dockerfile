@@ -89,7 +89,7 @@ RUN TINYAUTH_VERSION=$(curl -fsSL https://api.github.com/repos/steveiliop56/tiny
 # ─── Copy entrypoint & config templates ───────────────────────────────────────
 COPY scripts/entrypoint.sh /entrypoint.sh
 COPY scripts/setup-python.sh /setup-python.sh
-COPY config/Caddyfile.template /etc/caddy/Caddyfile.template
+COPY config/Caddyfile1.template /etc/caddy/Caddyfile.template
 COPY config/supervisord.conf /etc/supervisord.conf
 
 RUN chmod +x /entrypoint.sh /setup-python.sh
