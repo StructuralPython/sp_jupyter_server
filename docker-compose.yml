@@ -1,0 +1,57 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Structural Python — Engineering Container
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Bunny.net Magic Container environment variables (shown as a form in the UI):
+#
+#   AUTH_EMAIL        – Authelia login email address
+#   AUTH_PASSWORD     – Authelia initial login password (will be bcrypt-hashed)
+#   PYTHON_PACKAGES   – Space-separated list of pip packages for the venv
+#                       default: "structural_starterkit"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  engineering:
+    build:
+      context: .
+      args:
+        # Pass the package list through at build time so the image can bake
+        # a default; at runtime entrypoint.sh re-installs from the env var.
+        PYTHON_PACKAGES: ${PYTHON_PACKAGES:-structural_starterkit}
+    image: structural-python:latest
+    container_name: structural-python
+
+    # ── Bunny.net Magic Container variable declarations ──────────────────────
+    # These become the form fields shown in the bunny.net dashboard.
+    # Prefix lines with BunnyVar_ are parsed by bunny.net to generate the form.
+    # BunnyVar_AUTH_EMAIL=Email address for login|string|required
+    # BunnyVar_AUTH_PASSWORD=Initial login password|password|required
+    # BunnyVar_PYTHON_PACKAGES=Extra Python packages (space-separated)|string|optional
+    environment:
+      AUTH_EMAIL: ${AUTH_EMAIL}
+      AUTH_PASSWORD: ${AUTH_PASSWORD}
+      PYTHON_PACKAGES: ${PYTHON_PACKAGES:-structural_starterkit}
+
+    volumes:
+      # Volume 1 – user home directory (shared by JupyterLab & code-server)
+      - user-data:/home/engineering
+
+      # Volume 2 – application config (Caddy, Authelia, code-server settings)
+      - app-config:/config
+
+    ports:
+      - "8080:8080"
+
+    restart: unless-stopped
+
+    # Allow the engineering user to bind low ports via Caddy if needed
+    cap_add:
+      - NET_BIND_SERVICE
+
+volumes:
+  user-data:
+    name: user-data
+
+  app-config:
+    name: app-config

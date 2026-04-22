@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 
 # ─── Build-time arguments (configurable via docker-compose / bunny.net vars) ───
-ARG ENGINEERING_UID=1000
+ARG ENGINEERING_UID=1001
 ARG PYTHON_PACKAGES="structural_starterkit"
 
 # ─── Environment ──────────────────────────────────────────────────────────────
@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         xz-utils \
         default-jre \
+        gnupg \
         && rm -rf /var/lib/apt/lists/*
 
 # ─── Caddy ────────────────────────────────────────────────────────────────────
@@ -56,16 +57,17 @@ RUN QUARTO_VERSION=$(curl -fsSL https://api.github.com/repos/quarto-dev/quarto-c
     && rm /tmp/quarto.deb
 
 # ─── Tabula ───────────────────────────────────────────────────────────────────
-RUN curl -fsSLo /usr/local/bin/tabula.jar \
-        https://github.com/tabulapdf/tabula-java/releases/latest/download/tabula-jar-with-dependencies.jar \
+RUN TABULA_VERSION=$(curl -fsSL https://api.github.com/repos/tabulapdf/tabula-java/releases/latest \
+        | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/') \
+    && curl -fsSLo /usr/local/bin/tabula.jar \
+        "https://github.com/tabulapdf/tabula-java/releases/latest/download/tabula-${TABULA_VERSION}-jar-with-dependencies.jar" \
     && printf '#!/bin/sh\nexec java -jar /usr/local/bin/tabula.jar "$@"\n' \
         > /usr/local/bin/tabula \
     && chmod +x /usr/local/bin/tabula
 
-# ─── uv ───────────────────────────────────────────────────────────────────────
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && cp /root/.local/bin/uv /usr/local/bin/uv \
-    && cp /root/.local/bin/uvx /usr/local/bin/uvx
+# ─── uv ────────────────────────────────────────────────────────────────────
+RUN curl -LsSf https://astral.sh/uv/install.sh \
+        | env UV_INSTALL_DIR=/usr/local/bin sh
 
 # ─── code-server (VS Code) ────────────────────────────────────────────────────
 RUN curl -fsSL https://code-server.dev/install.sh | sh
@@ -77,11 +79,17 @@ RUN groupadd -g ${ENGINEERING_UID} engineering \
     && echo "engineering ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/engineering \
     && chmod 0440 /etc/sudoers.d/engineering
 
+# ─── TinyAuth ─────────────────────────────────────────────────────────────────
+RUN TINYAUTH_VERSION=$(curl -fsSL https://api.github.com/repos/steveiliop56/tinyauth/releases/latest \
+        | grep '"tag_name"' | sed 's/.*"\(v[^"]*\)".*/\1/') \
+    && curl -fsSLo /usr/local/bin/tinyauth \
+        "https://github.com/steveiliop56/tinyauth/releases/download/${TINYAUTH_VERSION}/tinyauth-amd64" \
+    && chmod +x /usr/local/bin/tinyauth
+
 # ─── Copy entrypoint & config templates ───────────────────────────────────────
 COPY scripts/entrypoint.sh /entrypoint.sh
 COPY scripts/setup-python.sh /setup-python.sh
 COPY config/Caddyfile.template /etc/caddy/Caddyfile.template
-COPY config/authelia/ /etc/authelia-template/
 COPY config/supervisord.conf /etc/supervisord.conf
 
 RUN chmod +x /entrypoint.sh /setup-python.sh
