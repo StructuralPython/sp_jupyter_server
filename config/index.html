@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structural Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0e0f11;
+    --surface:   #16181c;
+    --border:    #2a2d35;
+    --accent:    #c8f04a;
+    --accent2:   #4af0c8;
+    --accent3:   #f0784a;
+    --accent4:   #a78bfa;
+    --text:      #e8eaf0;
+    --muted:     #7a7f8e;
+    --radius:    12px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+  }
+
+  /* ── noise grain overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    gap: 3rem;
+  }
+
+  /* ── header ── */
+  header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── cards grid ── */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 1100px;
+}
+
+  @media (max-width: 640px) {
+    .cards { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: var(--radius);
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+  }
+
+  .card-jupyter  { --card-accent: var(--accent);  }
+  .card-vscode   { --card-accent: var(--accent2); }
+  .card-tabula   { --card-accent: var(--accent3); }
+  .card-terminal { --card-accent: var(--accent4); }
+
+  .card:hover { border-color: var(--card-accent); }
+
+  .card::after {
+    background: radial-gradient(ellipse at top left, var(--card-accent), transparent 70%);
+  }
+  .card:hover::after { opacity: 0.06; }
+
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--card-accent) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+  }
+
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .card-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .card-arrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--card-accent);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ── footer ── */
+  footer {
+    color: var(--muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── entrance animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  header        { animation: fadeUp 0.5s ease both; }
+  .card:nth-child(1) { animation: fadeUp 0.5s 0.15s ease both; }
+  .card:nth-child(2) { animation: fadeUp 0.5s 0.25s ease both; }
+  .card:nth-child(3) { animation: fadeUp 0.5s 0.35s ease both; }
+  .card:nth-child(4) { animation: fadeUp 0.5s 0.45s ease both; }
+  footer        { animation: fadeUp 0.5s 0.45s ease both; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <span class="eyebrow">Engineering Workbench</span>
+    <h1>Structural <em>Python</em></h1>
+    <p class="subtitle">Select a tool to get started</p>
+  </header>
+
+  <div class="cards">
+
+    <a href="/lab" class="card card-jupyter" target="_jupyter">
+      <div class="card-icon">⬡</div>
+      <div class="card-body">
+        <div class="card-title">JupyterLab</div>
+        <div class="card-desc">Interactive notebooks, data exploration, and the Structural Python kernel.</div>
+      </div>
+      <div class="card-arrow">Open &rarr;</div>
+    </a>
+
+    <a href="/code" class="card card-vscode" target="_code">
+      <div class="card-icon">&#9638;</div>
+      <div class="card-body">
+        <div class="card-title">VS Code</div>
+        <div class="card-desc">Full editor environment with file management, terminal, and extensions.</div>
+      </div>
+      <div class="card-arrow">Open &rarr;</div>
+    </a>
+
+    <a href="/tabula" class="card card-tabula" target="_tabula">
+      <div class="card-icon">&#9783;</div>
+      <div class="card-body">
+        <div class="card-title">Tabula</div>
+        <div class="card-desc">Extract tables from PDF files for use in your analysis workflows.</div>
+      </div>
+      <div class="card-arrow">Open &rarr;</div>
+    </a>
+
+    <a href="/terminal" class="card card-terminal" target="_terminal">
+        <div class="card-icon">&#8615;</div>
+        <div class="card-body">
+            <div class="card-title">Terminal</div>
+            <div class="card-desc">Direct shell access to the engineering environment and file system.</div>
+        </div>
+        <div class="card-arrow">Open &rarr;</div>
+    </a>
+
+  </div>
+
+  <footer>Structural Python &mdash; Engineering Container</footer>
+
+</div>
+</body>
+</html>

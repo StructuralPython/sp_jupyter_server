@@ -1,0 +1,70 @@
+title: highrise
+author: Me
+version: 0.0.1
+contributes:
+  project:
+    project:
+      type: default
+    format: highrise-pdf
+  formats: 
+    pdf:
+      template: highrise.tex
+      toc: false
+      number-sections: false
+      variables:
+        font-paths:
+          main: _extensions/highrise/main-font
+          code: _extensions/highrise/code-font
+        logo-path: _extensions/highrise/logo.png
+      fonts:
+        main: 
+          font-family: Ubuntu
+          scale: 0.9
+          color: "000000"
+        code:
+          font-family: CaskaydiaCoveNerdFont
+          scale: 0.9
+          color: "000000"
+          background-color: eeeeee
+      highlight-style: a11y
+      papersize: letter
+      landscape: false
+      margins:
+        top: 60pt # I do not recommend changing this value
+        bottom: 30pt
+        left: 30pt
+        right: 30pt
+        headsep: 60pt
+
+      colorbar:
+        logo: true
+
+      contentbox:
+        outline:
+          color: "eeeeee"
+          line_weight: 1pt
+          radius: 2pt
+        background:
+          color: "ffffff"
+        padding:
+          top: 5mm
+          bottom: 5mm
+          left: 15mm
+          right: 15mm
+          splits: 15mm
+
+      engheader:
+        project_id: ""
+        project_name: ""
+        designer: ""
+        subject: ""
+        page_count: true
+        format:
+          logo: false
+          width_ratio: 0.8
+          align-left: false
+          line_weight: 1pt
+          topline:
+            color: "000000"
+          bottomline:
+            color: "cccccc"

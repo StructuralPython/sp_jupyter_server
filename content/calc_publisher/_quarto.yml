@@ -1,0 +1,48 @@
+author: "Connor Ferster"
+execute:
+  enabled: true
+  echo: false
+project:
+    execute-dir: project
+    
+# Set your highrise customizations for your project, here
+format:
+    highrise-pdf:
+        toc: false
+        highlight-style: a11y
+        papersize: letter 
+        landscape: false
+        variables:
+            font-paths:
+              main: _extensions/highrise/main-font
+              code: _extensions/highrise/code-font
+            logo-path: _extensions/highrise/logo-dir/logo.png
+        margins:
+          top: 60pt
+          bottom: 30pt
+          left: 30pt
+          right: 30pt
+          headsep: 60pt
+        colorbar:
+          location-left: true
+          color: 333333
+          size: "1.5cm"
+          logo: true
+        contentbox: false
+        engheader:
+          project_id: "2025.0003.03"
+          project_name: "Snow Shelter"
+          designer: "CMF"
+          subject: ""
+          page_count: true
+          format:
+            logo: false 
+            width_ratio: 0.7 
+            align-left: false 
+            line_weight: 1pt
+            topline:
+              color: "333333"
+            bottomline:
+              color: "333333"
+    
+    

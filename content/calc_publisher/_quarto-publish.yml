@@ -1,0 +1,12 @@
+project:
+    render: # Check your spelling here - If you mis-spell one of your filenames, it will be skipped without notice
+      - "for_rendering/"
+    output-dir: published
+format:
+    highrise-pdf:
+        engheader:
+          project_id: "2026-1343-001"
+          project_name: "Example Project"
+          designer: "CMF"
+          subject: ""
+          page_count: true

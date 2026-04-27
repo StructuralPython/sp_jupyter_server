@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-# ─── Build-time arguments (configurable via docker-compose / bunny.net vars) ───
+# ─── Build-time arguments ──────────────────────────────────────────────────────
 ARG ENGINEERING_UID=1001
 ARG PYTHON_PACKAGES="structural_starterkit"
 
@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         nano \
         graphviz \
+        unzip \
         sudo \
         ca-certificates \
         build-essential \
@@ -56,7 +57,14 @@ RUN QUARTO_VERSION=$(curl -fsSL https://api.github.com/repos/quarto-dev/quarto-c
     && dpkg -i /tmp/quarto.deb \
     && rm /tmp/quarto.deb
 
-# ─── Tabula ───────────────────────────────────────────────────────────────────
+# ─── Tabula (web app) ─────────────────────────────────────────────────────────
+# tabula-java is the CLI extraction tool; the web UI comes from tabulapdf/tabula
+RUN curl -fsSLo /tmp/tabula.zip \
+        "https://github.com/tabulapdf/tabula/releases/download/v1.2.1/tabula-jar-1.2.1.zip" \
+    && unzip -q /tmp/tabula.zip -d /usr/local/bin/tabula-web \
+    && rm /tmp/tabula.zip
+ 
+# Also install tabula-java CLI for command-line use
 RUN TABULA_VERSION=$(curl -fsSL https://api.github.com/repos/tabulapdf/tabula-java/releases/latest \
         | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/') \
     && curl -fsSLo /usr/local/bin/tabula.jar \
@@ -65,12 +73,17 @@ RUN TABULA_VERSION=$(curl -fsSL https://api.github.com/repos/tabulapdf/tabula-ja
         > /usr/local/bin/tabula \
     && chmod +x /usr/local/bin/tabula
 
-# ─── uv ────────────────────────────────────────────────────────────────────
+# ─── uv ───────────────────────────────────────────────────────────────────────
 RUN curl -LsSf https://astral.sh/uv/install.sh \
         | env UV_INSTALL_DIR=/usr/local/bin sh
 
 # ─── code-server (VS Code) ────────────────────────────────────────────────────
 RUN curl -fsSL https://code-server.dev/install.sh | sh
+
+# ─── ttyd (web terminal) ──────────────────────────────────────────────────────
+RUN curl -fsSLo /usr/local/bin/ttyd \
+        "https://github.com/tsl0922/ttyd/releases/latest/download/ttyd.x86_64" \
+    && chmod +x /usr/local/bin/ttyd
 
 # ─── engineering user ─────────────────────────────────────────────────────────
 RUN groupadd -g ${ENGINEERING_UID} engineering \
@@ -79,27 +92,21 @@ RUN groupadd -g ${ENGINEERING_UID} engineering \
     && echo "engineering ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/engineering \
     && chmod 0440 /etc/sudoers.d/engineering
 
-# ─── TinyAuth ─────────────────────────────────────────────────────────────────
-RUN TINYAUTH_VERSION=$(curl -fsSL https://api.github.com/repos/steveiliop56/tinyauth/releases/latest \
-        | grep '"tag_name"' | sed 's/.*"\(v[^"]*\)".*/\1/') \
-    && curl -fsSLo /usr/local/bin/tinyauth \
-        "https://github.com/steveiliop56/tinyauth/releases/download/${TINYAUTH_VERSION}/tinyauth-amd64" \
-    && chmod +x /usr/local/bin/tinyauth
-
-# ─── Copy entrypoint & config templates ───────────────────────────────────────
-COPY scripts/entrypoint.sh /entrypoint.sh
-COPY scripts/setup-python.sh /setup-python.sh
-COPY config/Caddyfile1.template /etc/caddy/Caddyfile.template
-COPY config/supervisord.conf /etc/supervisord.conf
-
-RUN chmod +x /entrypoint.sh /setup-python.sh
-
 # ─── supervisord ──────────────────────────────────────────────────────────────
 RUN apt-get update \
     && apt-get install -y --no-install-recommends supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Expose only the Caddy port; all internal services are behind it
+# ─── Copy entrypoint & config ─────────────────────────────────────────────────
+COPY scripts/entrypoint.sh /entrypoint.sh
+COPY scripts/setup-python.sh /setup-python.sh
+COPY config/Caddyfile.template /etc/caddy/Caddyfile.template
+COPY config/index.html /etc/caddy/index.html
+COPY config/supervisord.conf /etc/supervisord.conf
+COPY content/ /etc/skel-engineering/
+
+RUN chmod +x /entrypoint.sh /setup-python.sh
+
 EXPOSE 8080
 
 ENTRYPOINT ["/entrypoint.sh"]
