@@ -25,7 +25,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         build-essential \
         xz-utils \
-        default-jre \
         gnupg \
         && rm -rf /var/lib/apt/lists/*
 
@@ -56,6 +55,11 @@ RUN QUARTO_VERSION=$(curl -fsSL https://api.github.com/repos/quarto-dev/quarto-c
         "https://github.com/quarto-dev/quarto-cli/releases/latest/download/quarto-${QUARTO_VERSION}-linux-amd64.deb" \
     && dpkg -i /tmp/quarto.deb \
     && rm /tmp/quarto.deb
+
+# ─── Java 11 (required for Tabula web app compatibility) ─────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        openjdk-11-jre \
+        && rm -rf /var/lib/apt/lists/*
 
 # ─── Tabula (web app) ─────────────────────────────────────────────────────────
 # tabula-java is the CLI extraction tool; the web UI comes from tabulapdf/tabula
@@ -91,6 +95,30 @@ RUN groupadd -g ${ENGINEERING_UID} engineering \
         -s /bin/bash engineering \
     && echo "engineering ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/engineering \
     && chmod 0440 /etc/sudoers.d/engineering
+
+# ─── Oh My Bash ───────────────────────────────────────────────────────────────
+RUN export HOME=/home/engineering \
+    && bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" \
+        --unattended \
+    && sed -i 's/OSH_THEME="font"/OSH_THEME="half-life"/' /home/engineering/.bashrc \
+    && echo 'export VIRTUAL_ENV_DISABLE_PROMPT=1' >> /home/engineering/.bashrc \
+    && chown -R engineering:engineering \
+        /home/engineering/.bashrc \
+        /home/engineering/.oh-my-bash
+
+# # ─── Bash venv prompt enhancement ────────────────────────────────────────────
+# RUN echo '\n# Show active venv name in prompt\nexport VIRTUAL_ENV_DISABLE_PROMPT=1' \
+#         >> /home/engineering/.bashrc
+
+# # Configure Oh My Bash for the engineering user
+# RUN cp /root/.bashrc /home/engineering/.bashrc \
+#     && cp -r /root/.oh-my-bash /home/engineering/.oh-my-bash \
+#     && sed -i 's|/root/.oh-my-bash|/home/engineering/.oh-my-bash|g' \
+#         /home/engineering/.bashrc \
+#     && chown -R engineering:engineering \
+#         /home/engineering/.bashrc \
+#         /home/engineering/.oh-my-bash
+
 
 # ─── supervisord ──────────────────────────────────────────────────────────────
 RUN apt-get update \

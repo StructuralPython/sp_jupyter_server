@@ -1,61 +1,55 @@
 {
-    admin off
+	admin off
 }
 
 :8080 {
-
     route / {
         root * /etc/caddy
         rewrite * /index.html
         file_server
     }
 
-    route /lab* {
-        reverse_proxy 127.0.0.1:8888 {
-            header_up Host {upstream_hostport}
-        }
-    }
+	route /lab* {
+		reverse_proxy 127.0.0.1:8888 {
+			header_up Host {upstream_hostport}
+		}
+	}
 
-    @code_bare path /code
-    redir @code_bare /code/ 301
- 
-    route /code/* {
-        uri strip_prefix /code
-        reverse_proxy 127.0.0.1:8081 {
-            header_up Host {upstream_hostport}
-        }
-    }
+	@code_bare path /code
+	redir @code_bare /code/ 301
 
-    route /tabula* {
-        uri strip_prefix /tabula
-        reverse_proxy 127.0.0.1:9999 {
-            header_up Host {upstream_hostport}
-        }
-    }
+	route /code/* {
+		uri strip_prefix /code
+		reverse_proxy 127.0.0.1:8081 {
+			header_up Host {upstream_hostport}
+		}
+	}
+
+	route /tabula* {
+		uri strip_prefix /tabula
+		reverse_proxy 127.0.0.1:9999 {
+			header_up Host {upstream_hostport}
+		}
+	}
 
     route /terminal* {
         uri strip_prefix /terminal
         reverse_proxy 127.0.0.1:7681 {
             header_up Host {upstream_hostport}
-            header_up Upgrade {http.request.header.Upgrade}
-            header_up Connection {http.request.header.Connection}
-            transport http {
-                versions h1 h2
-            }
         }
     }
 
-    route /healthz {
-        respond "OK" 200
-    }
+	route /healthz {
+		respond "OK" 200
+	}
 
     log {
-        output file /var/log/caddy-access.log {
+        output file /config/caddy/access.log {
             roll_size 10mb
             roll_keep 3
         }
         format json
     }
 
-    encode gzip
+	encode gzip
 }
