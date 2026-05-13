@@ -60,13 +60,6 @@ RUN QUARTO_VERSION=$(curl -fsSL https://api.github.com/repos/quarto-dev/quarto-c
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openjdk-11-jre \
         && rm -rf /var/lib/apt/lists/*
-
-# ─── Tabula (web app) ─────────────────────────────────────────────────────────
-# tabula-java is the CLI extraction tool; the web UI comes from tabulapdf/tabula
-RUN curl -fsSLo /tmp/tabula.zip \
-        "https://github.com/tabulapdf/tabula/releases/download/v1.2.1/tabula-jar-1.2.1.zip" \
-    && unzip -q /tmp/tabula.zip -d /usr/local/bin/tabula-web \
-    && rm /tmp/tabula.zip
  
 # Also install tabula-java CLI for command-line use
 RUN TABULA_VERSION=$(curl -fsSL https://api.github.com/repos/tabulapdf/tabula-java/releases/latest \

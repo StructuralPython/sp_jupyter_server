@@ -15,7 +15,6 @@
     --border:    #2a2d35;
     --accent:    #c8f04a;
     --accent2:   #4af0c8;
-    --accent3:   #f0784a;
     --accent4:   #a78bfa;
     --text:      #e8eaf0;
     --muted:     #7a7f8e;
@@ -30,7 +29,6 @@
     font-size: 14px;
   }
 
-  /* ── noise grain overlay ── */
   body::before {
     content: '';
     position: fixed;
@@ -52,7 +50,6 @@
     gap: 3rem;
   }
 
-  /* ── header ── */
   header {
     text-align: center;
     display: flex;
@@ -88,14 +85,13 @@
     letter-spacing: 0.05em;
   }
 
-  /* ── cards grid ── */
-.cards {
+  .cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.25rem;
     width: 100%;
-    max-width: 1100px;
-}
+    max-width: 860px;
+  }
 
   @media (max-width: 640px) {
     .cards { grid-template-columns: 1fr; }
@@ -123,23 +119,19 @@
     opacity: 0;
     transition: opacity 0.2s;
     border-radius: var(--radius);
+    background: radial-gradient(ellipse at top left, var(--card-accent), transparent 70%);
   }
 
   .card:hover {
     transform: translateY(-3px);
+    border-color: var(--card-accent);
   }
+
+  .card:hover::after { opacity: 0.06; }
 
   .card-jupyter  { --card-accent: var(--accent);  }
   .card-vscode   { --card-accent: var(--accent2); }
-  .card-tabula   { --card-accent: var(--accent3); }
   .card-terminal { --card-accent: var(--accent4); }
-
-  .card:hover { border-color: var(--card-accent); }
-
-  .card::after {
-    background: radial-gradient(ellipse at top left, var(--card-accent), transparent 70%);
-  }
-  .card:hover::after { opacity: 0.06; }
 
   .card-icon {
     width: 40px;
@@ -192,25 +184,22 @@
     transform: translateX(0);
   }
 
-  /* ── footer ── */
   footer {
     color: var(--muted);
     font-size: 0.7rem;
     letter-spacing: 0.08em;
   }
 
-  /* ── entrance animations ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  header        { animation: fadeUp 0.5s ease both; }
+  header             { animation: fadeUp 0.5s ease both; }
   .card:nth-child(1) { animation: fadeUp 0.5s 0.15s ease both; }
   .card:nth-child(2) { animation: fadeUp 0.5s 0.25s ease both; }
   .card:nth-child(3) { animation: fadeUp 0.5s 0.35s ease both; }
-  .card:nth-child(4) { animation: fadeUp 0.5s 0.45s ease both; }
-  footer        { animation: fadeUp 0.5s 0.45s ease both; }
+  footer             { animation: fadeUp 0.5s 0.45s ease both; }
 </style>
 </head>
 <body>
@@ -242,22 +231,13 @@
       <div class="card-arrow">Open &rarr;</div>
     </a>
 
-    <a href="/tabula" class="card card-tabula" target="_tabula">
-      <div class="card-icon">&#9783;</div>
+    <a href="/terminal" class="card card-terminal" target="_terminal">
+      <div class="card-icon">&#8615;</div>
       <div class="card-body">
-        <div class="card-title">Tabula</div>
-        <div class="card-desc">Extract tables from PDF files for use in your analysis workflows.</div>
+        <div class="card-title">Terminal</div>
+        <div class="card-desc">Direct shell access to the engineering environment and file system.</div>
       </div>
       <div class="card-arrow">Open &rarr;</div>
-    </a>
-
-    <a href="/terminal" class="card card-terminal" target="_terminal">
-        <div class="card-icon">&#8615;</div>
-        <div class="card-body">
-            <div class="card-title">Terminal</div>
-            <div class="card-desc">Direct shell access to the engineering environment and file system.</div>
-        </div>
-        <div class="card-arrow">Open &rarr;</div>
     </a>
 
   </div>
