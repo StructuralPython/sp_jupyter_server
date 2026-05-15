@@ -17,9 +17,12 @@ services:
         PYTHON_PACKAGES: ${PYTHON_PACKAGES:-structural_starterkit}
     image: structural-python:latest
     container_name: structural-python
-
-    # BunnyVar_PYTHON_PACKAGES=Extra Python packages (space-separated)|string|optional
     environment:
+      # BunnyVar_AUTH_EMAIL=Email address for login|string|required
+      # BunnyVar_AUTH_PASSWORD=Initial login password|password|required
+      # BunnyVar_PYTHON_PACKAGES=Extra Python packages (space-separated)|string|optional
+      AUTH_EMAIL: ${AUTH_EMAIL}
+      AUTH_PASSWORD: ${AUTH_PASSWORD}
       PYTHON_PACKAGES: ${PYTHON_PACKAGES:-structural_starterkit}
 
     volumes:
