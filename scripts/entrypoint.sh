@@ -30,6 +30,9 @@ chown -R engineering:engineering /config
 # ─────────────────────────────────────────────────────────────────────────────
 cp /etc/caddy/Caddyfile.template "${CADDY_CONFIG_DIR}/Caddyfile"
 
+
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. code-server config
 # ─────────────────────────────────────────────────────────────────────────────
@@ -75,6 +78,27 @@ if [ -d /etc/skel-engineering ]; then
     cp -rn /etc/skel-engineering/. "${HOME_DIR}/"
     chown -R engineering:engineering "${HOME_DIR}"
 fi
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TinyAuth user setup
+# ─────────────────────────────────────────────────────────────────────────────
+TINYAUTH_USERNAME=$(echo "${AUTH_EMAIL}" | cut -d'@' -f1)
+TINYAUTH_USER=$(/usr/local/bin/tinyauth user create \
+    --username "${TINYAUTH_USERNAME}" \
+    --password "${AUTH_PASSWORD}" \
+    --docker 2>&1 | grep -oP 'user=\K\S+')
+
+export TINYAUTH_APPURL="https://tinyauth.engtoolkit.com"
+export TINYAUTH_AUTH_USERS="${TINYAUTH_USER}"
+export TINYAUTH_SERVER_ADDRESS="0.0.0.0"
+export TINYAUTH_SERVER_PORT="3000"
+export TINYAUTH_DATABASE_PATH="/config/tinyauth/tinyauth.db"
+export TINYAUTH_ANALYTICS_ENABLED="false"
+
+mkdir -p /config/tinyauth
+chown -R root:root /config/tinyauth
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 6. Hand off to supervisord
