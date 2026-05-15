@@ -48,6 +48,15 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     && apt-get install -y --no-install-recommends gh \
     && rm -rf /var/lib/apt/lists/*
 
+
+# ─── TinyAuth ─────────────────────────────────────────────────────────────────
+RUN TINYAUTH_VERSION=$(curl -fsSL https://api.github.com/repos/steveiliop56/tinyauth/releases/latest \
+        | grep '"tag_name"' | sed 's/.*"\(v[^"]*\)".*/\1/') \
+    && curl -fsSLo /usr/local/bin/tinyauth \
+        "https://github.com/steveiliop56/tinyauth/releases/download/${TINYAUTH_VERSION}/tinyauth-amd64" \
+    && chmod +x /usr/local/bin/tinyauth
+
+
 # ─── Quarto ───────────────────────────────────────────────────────────────────
 RUN QUARTO_VERSION=$(curl -fsSL https://api.github.com/repos/quarto-dev/quarto-cli/releases/latest \
         | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/') \
@@ -98,7 +107,7 @@ RUN export HOME=/etc/skel-engineering \
     && echo 'export VIRTUAL_ENV_DISABLE_PROMPT=1' >> /etc/skel-engineering/.bashrc \
     && sed -i 's|/etc/skel-engineering/.oh-my-bash|/home/engineering/.oh-my-bash|g' \
         /etc/skel-engineering/.bashrc
-        
+
 # # ─── Bash venv prompt enhancement ────────────────────────────────────────────
 # RUN echo '\n# Show active venv name in prompt\nexport VIRTUAL_ENV_DISABLE_PROMPT=1' \
 #         >> /home/engineering/.bashrc
