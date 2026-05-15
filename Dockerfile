@@ -90,15 +90,15 @@ RUN groupadd -g ${ENGINEERING_UID} engineering \
     && chmod 0440 /etc/sudoers.d/engineering
 
 # ─── Oh My Bash ───────────────────────────────────────────────────────────────
-RUN export HOME=/home/engineering \
+RUN export HOME=/etc/skel-engineering \
+    && mkdir -p /etc/skel-engineering \
     && bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" \
         --unattended \
-    && sed -i 's/OSH_THEME="font"/OSH_THEME="half-life"/' /home/engineering/.bashrc \
-    && echo 'export VIRTUAL_ENV_DISABLE_PROMPT=1' >> /home/engineering/.bashrc \
-    && chown -R engineering:engineering \
-        /home/engineering/.bashrc \
-        /home/engineering/.oh-my-bash
-
+    && sed -i 's/OSH_THEME="font"/OSH_THEME="half-life"/' /etc/skel-engineering/.bashrc \
+    && echo 'export VIRTUAL_ENV_DISABLE_PROMPT=1' >> /etc/skel-engineering/.bashrc \
+    && sed -i 's|/etc/skel-engineering/.oh-my-bash|/home/engineering/.oh-my-bash|g' \
+        /etc/skel-engineering/.bashrc
+        
 # # ─── Bash venv prompt enhancement ────────────────────────────────────────────
 # RUN echo '\n# Show active venv name in prompt\nexport VIRTUAL_ENV_DISABLE_PROMPT=1' \
 #         >> /home/engineering/.bashrc
