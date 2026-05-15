@@ -1,40 +1,58 @@
 {
-	admin off
+    admin off
 }
 
-:8080 {
+# ── Reusable TinyAuth forward-auth snippet ────────────────────────────────────
+(tinyauth_forwarder) {
+    forward_auth 127.0.0.1:3000 {
+        uri /api/auth/caddy
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+}
+
+# ── TinyAuth portal — tinyauth.engtoolkit.com ─────────────────────────────────
+tinyauth.engtoolkit.com {
+    reverse_proxy 127.0.0.1:3000
+}
+
+# ── Main app — dash.engtoolkit.com ────────────────────────────────────────────
+dash.engtoolkit.com {
+
     route / {
         root * /etc/caddy
         rewrite * /index.html
         file_server
     }
 
-	route /lab* {
-		reverse_proxy 127.0.0.1:8888 {
-			header_up Host {upstream_hostport}
-		}
-	}
+    route /lab* {
+        import tinyauth_forwarder
+        reverse_proxy 127.0.0.1:8888 {
+            header_up Host {upstream_hostport}
+        }
+    }
 
-	@code_bare path /code
-	redir @code_bare /code/ 301
+    @code_bare path /code
+    redir @code_bare /code/ 301
 
-	route /code/* {
-		uri strip_prefix /code
-		reverse_proxy 127.0.0.1:8081 {
-			header_up Host {upstream_hostport}
-		}
-	}
+    route /code/* {
+        import tinyauth_forwarder
+        uri strip_prefix /code
+        reverse_proxy 127.0.0.1:8081 {
+            header_up Host {upstream_hostport}
+        }
+    }
 
     route /terminal* {
+        import tinyauth_forwarder
         uri strip_prefix /terminal
         reverse_proxy 127.0.0.1:7681 {
             header_up Host {upstream_hostport}
         }
     }
 
-	route /healthz {
-		respond "OK" 200
-	}
+    route /healthz {
+        respond "OK" 200
+    }
 
     log {
         output file /config/caddy/access.log {
@@ -44,5 +62,5 @@
         format json
     }
 
-	encode gzip
+    encode gzip
 }
