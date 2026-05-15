@@ -2,21 +2,18 @@
     admin off
 }
 
-# ── Reusable TinyAuth forward-auth snippet ────────────────────────────────────
 (tinyauth_forwarder) {
     forward_auth 127.0.0.1:3000 {
         uri /api/auth/caddy
-        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+        copy_headers Remote-User Remote-Name Remote-Email Remote-Groups
     }
 }
 
-# ── TinyAuth portal — tinyauth.engtoolkit.com ─────────────────────────────────
-tinyauth.engtoolkit.com {
+http://tinyauth.engtoolkit.com {
     reverse_proxy 127.0.0.1:3000
 }
 
-# ── Main app — dash.engtoolkit.com ────────────────────────────────────────────
-dash.engtoolkit.com {
+http://dash.engtoolkit.com {
 
     route / {
         root * /etc/caddy
